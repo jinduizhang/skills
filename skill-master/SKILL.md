@@ -1,6 +1,6 @@
 ---
 name: skill-master
-description: Skill优化大师。自动分析并优化任意Skill，提升遵从度。支持三种模式：1)提升遵从度 2)通用优化 3)超长裁剪。自动识别问题并选择最优优化方案。
+description: Skill优化大师。自动分析并优化任意Skill，提升遵从度。整合三个优化子技能：skill-compliance-boost（提升遵从度）、skill-optimizer（通用优化）、skill-trimmer（超长裁剪）。自动识别问题并选择最优优化方案。
 metadata:
   author: skill-master
   version: "1.0"
@@ -55,50 +55,53 @@ metadata:
 
 | 问题 | 检测方法 | 解决方案 |
 |------|----------|----------|
-| Token太长 | 行数>500 | 裁剪模式 |
-| 触发不准确 | description模糊/太短 | 优化触发条件 |
-| 不按要求执行 | 缺少强制词 | 添加强制格式 |
-| 多任务混合 | 包含多个功能 | 拆分子skill |
-| 综合问题 | 多个问题并存 | 综合优化 |
+| Token太长 | 行数>500 | 加载 skill-trimmer |
+| 触发不准确 | description模糊/太短 | 加载 skill-optimizer |
+| 不按要求执行 | 缺少强制词 | 加载 skill-compliance-boost |
+| 多任务混合 | 包含多个功能 | 加载 skill-compliance-boost |
+| 综合问题 | 多个问题并存 | 按顺序加载多个子skill |
 
-### Step 3: 自动优化
+### Step 3: 自动选择子技能
 
-根据诊断结果自动选择优化方案：
+根据诊断结果自动选择：
 
 ```
-诊断结果 → 优化方案
-├── 问题1: Token太长 → 使用裁剪模式
+诊断结果 → 加载对应子skill
+├── Token太长 (>500行) → skill-trimmer
 │   ├── 详细文档 → references/
 │   ├── 模板 → assets/
 │   └── SKILL.md → <500行
 │
-├── 问题2: 触发不准确 → 优化description
+├── 需要优化触发条件 → skill-optimizer
 │   ├── 添加正向触发词
 │   └── 添加负向触发词
 │
-├── 问题3: 不按要求执行 → 添加强制格式
-│   ├── [HIGHEST_PRIORITY]
-│   └── MUST 执行词
+├── 需要提升遵从度 → skill-compliance-boost
+│   ├── 添加强制格式
+│   └── 明确执行边界
 │
-└── 问题4: 多任务混合 → 拆分skill
-    ├── 1个路由skill
-    └── N个子skill
+└── 综合问题 → 按顺序执行
+    ├── skill-trimmer (先裁剪)
+    ├── skill-optimizer (再优化)
+    └── skill-compliance-boost (最后提升遵从度)
 ```
 
 ---
 
-## 三种优化模式
+## 子技能说明
 
-### 模式1: 提升遵从度 (compliance)
+### skill-compliance-boost
+**用途**: 提升Skill遵从度
 
 **触发**: "提升遵从度"、"让skill更听话"
 
 **优化内容**:
 - 优化description触发词
-- 添加强制格式
+- 添加强制格式 [HIGHEST_PRIORITY]
 - 明确执行边界
 
-### 模式2: 通用优化 (optimize)
+### skill-optimizer
+**用途**: 通用Skill优化
 
 **触发**: "优化skill"、"精简skill"
 
@@ -107,7 +110,8 @@ metadata:
 - 添加触发条件
 - 精简到核心指令
 
-### 模式3: 超长裁剪 (trim)
+### skill-trimmer
+**用途**: 超长Skill裁剪
 
 **触发**: "裁剪skill"、"太长"
 
@@ -137,13 +141,13 @@ metadata:
 # 优化完成
 
 ## 诊断结果
-- 问题1: [描述]
-- 问题2: [描述]
+- 问题1: [描述] → 加载 [子技能]
+- 问题2: [描述] → 加载 [子技能]
 
-## 优化内容
-- [x] 精简Token
-- [x] 优化触发条件
-- [x] 添加强制格式
+## 执行的子技能
+- [x] skill-trimmer (裁剪)
+- [x] skill-optimizer (优化)
+- [x] skill-compliance-boost (提升遵从度)
 
 ## 修改的文件
 - SKILL.md (已优化)
